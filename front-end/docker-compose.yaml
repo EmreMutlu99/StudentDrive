@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  angular:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    working_dir: /workspace
+    ports:
+      - "4200:4200"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      NG_CLI_ANALYTICS: "false"
+    volumes:
+      - .:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - npm_cache:/root/.npm
+    # Always install deps before serving
+    command: >
+      sh -c "npm ci &&
+             ng version &&
+             ng serve --host 0.0.0.0 --port 4200 --poll 2000"
+
+volumes:
+  node_modules:
+  npm_cache:

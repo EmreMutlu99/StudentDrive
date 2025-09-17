@@ -1,0 +1,27 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+// Global icon font
+@import "../public/fonts/feather/style.css";
+
+
+// 3rd party plugins
+@import "highlight.js/styles/atom-one-light.css";
+@import 'ngx-owl-carousel-o/lib/styles/scss/owl.carousel';
+@import 'ngx-owl-carousel-o/lib/styles/scss/owl.theme.default';
+@import "animate.css/animate.min.css"; // used in ngx-owl-carousel-o
+@import "@ng-select/ng-select/themes/default.theme.css";
+@import "metismenujs/scss/metismenujs";
+@import "dropzone/dist/min/dropzone.min.css";
+@import "quill/dist/quill.snow.css";
+@import "@rg-software/angular-archwizard/styles/archwizard";
+@import "@siemens/ngx-datatable/index";
+@import "@siemens/ngx-datatable/themes/bootstrap";
+@import "@siemens/ngx-datatable/assets/icons";
+
+
+// NobleUI styles for LTR layout
+@import "./styles/styles.scss";
+
+// NobleUI styles for RTL layout. Replace the above style with this CSS file to enable RTL styles
+// @import "./styles/rtl-css/styles.rtl.css";

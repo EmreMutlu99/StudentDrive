@@ -1,0 +1,60 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a routerLink=".">Advanced UI</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Image Cropper</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-md-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Ngx-Image-Cropper</h4>
+        <p class="text-secondary">Read the <a href="https://github.com/Mawi137/ngx-image-cropper" target="_blank"> Official Ngx-Image-Cropper Plugin Documentation </a>for a full list of instructions and other options.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">        
+        <h6 class="card-title">Basic Example</h6>
+        <div>
+          <input class="form-control mb-3" type="file" (change)="fileChangeEvent($event)" />
+          @if (isLoadImageFailed) {
+            <p class="text-danger">Failed to load image. Please try again.</p>
+          }
+          @if (isNoFileChosen) {
+            <p class="text-danger">No file chosen. Please chose a file.</p>
+          }
+        </div>
+        @if (showImageCropper) {
+          <div class="row">
+            <div class="col-md-8">
+              <image-cropper
+                [imageURL]="imageUrl"
+                [imageChangedEvent]="imageChangedEvent"
+                [maintainAspectRatio]="true"
+                [aspectRatio]="4 / 3"
+                format="png"
+                (imageCropped)="imageCropped($event)"
+                (imageLoaded)="imageLoaded($event)"
+                (cropperReady)="cropperReady()"
+                (loadImageFailed)="loadImageFailed()"
+                class="border"
+              ></image-cropper>
+            </div>
+            <div class="col-md-4">
+              <h6 class="text-secondary mb-3">Cropped Image: </h6>
+              <img [src]="croppedImage" class="w-100 border" />
+              <a href="" class="btn btn-outline-primary mt-2" id="croppedImageDownload" download="cropped-image.png">Download cropped image</a>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>

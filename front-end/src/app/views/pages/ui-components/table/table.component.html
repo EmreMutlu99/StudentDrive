@@ -1,0 +1,192 @@
+<div class="row">
+  <div class="col-xl-10 main-content ps-xl-4 pe-xl-5">
+    <h1 class="page-title">Table</h1>
+    <p class="lead">Here are some simple examples of common table features. Read the <a href="https://ng-bootstrap.github.io/#/components/table/examples" target="_blank">Official Ng-Bootstrap Documentation</a> for a full list of instructions and other options.</p>
+    
+    <hr>
+    
+    <h4 #default>Basic Example</h4>
+    <p class="mb-3">Table is just a mapping of objects to table rows with <code>&#64;for</code></p>
+    <div class="example">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Country</th>
+            <th scope="col">Area</th>
+            <th scope="col">Population</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (country of countries; track country.name; let i = $index) {
+            <tr>
+              <th scope="row">{{ i + 1 }}</th>
+              <td>
+                <img
+                  [src]="'https://upload.wikimedia.org/wikipedia/commons/' + country.flag"
+                  [alt]="'The flag of ' + country.name"
+                  class="me-2 w-20px"
+                />
+                {{ country.name }}
+              </td>
+              <td>{{ country.area | number }}</td>
+              <td>{{ country.population | number }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-code-preview [codeContent]="defaultTableCode"></app-code-preview>
+
+    <hr>
+    
+    <h4 #sortable>Sortable table</h4>
+    <p class="mb-3">You can introduce custom directives for table headers to sort columns</p>
+    <div class="example">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col" sortable="name" (sort)="onSort($event)">Country</th>
+            <th scope="col" sortable="area" (sort)="onSort($event)">Area</th>
+            <th scope="col" sortable="population" (sort)="onSort($event)">Population</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (country of countries; track country.name) {
+            <tr>
+              <th scope="row">{{ country.id }}</th>
+              <td>
+                <img
+                  [src]="'https://upload.wikimedia.org/wikipedia/commons/' + country.flag"
+                  [alt]="'The flag of ' + country.name"
+                  class="me-2 w-20px"
+                />
+                {{ country.name }}
+              </td>
+              <td>{{ country.area | number }}</td>
+              <td>{{ country.population | number }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-code-preview [codeContent]="sortableTableCode"></app-code-preview>
+
+    <hr>
+
+    <h4 #searchFiltering>Search and filtering</h4>
+    <p class="mb-3">You can do filter table data, in this case with observables and <code>NgbHighlight</code> component used in Typeahead</p>
+    <div class="example">
+      <form>
+        <div class="mb-3 row">
+          <label for="table-filtering-search" class="col-xs-3 col-sm-auto col-form-label">Full text search:</label>
+          <div class="col-xs-3 col-sm-auto">
+            <input id="table-filtering-search" class="form-control" type="text" [formControl]="filter" />
+          </div>
+        </div>
+      </form>
+      
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Country</th>
+            <th scope="col">Area</th>
+            <th scope="col">Population</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (country of countries$ | async; track country.name; let i = $index) {
+            <tr>
+              <th scope="row">{{ i + 1 }}</th>
+              <td>
+                <img
+                  [src]="'https://upload.wikimedia.org/wikipedia/commons/' + country.flag"
+                  [alt]="'The flag of ' + country.name"
+                  class="me-2 w-20px"
+                />
+                <ngb-highlight [result]="country.name" [term]="filter.value" />
+              </td>
+              <td><ngb-highlight [result]="country.area | number" [term]="filter.value" /></td>
+              <td><ngb-highlight [result]="country.population | number" [term]="filter.value" /></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" style="text-align: center">No countries found</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-code-preview [codeContent]="searchFilteringTableCode"></app-code-preview>
+
+    <hr>
+
+    <h4 #pagination>Pagination</h4>
+    <p class="mb-3">You can bind <code>NgbPagination</code> component with slicing the data list</p>
+    <div class="example">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Country</th>
+            <th scope="col">Area</th>
+            <th scope="col">Population</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (country of countries_pagination; track country.name) {
+            <tr>
+              <th scope="row">{{ country.id }}</th>
+              <td>
+                <img
+                  [src]="'https://upload.wikimedia.org/wikipedia/commons/' + country.flag"
+                  [alt]="'The flag of ' + country.name"
+                  class="me-2 w-20px"
+                />
+                {{ country.name }}
+              </td>
+              <td>{{ country.area | number }}</td>
+              <td>{{ country.population | number }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      
+      <div class="d-flex justify-content-between flex-wrap p-2">
+        <ngb-pagination
+          [collectionSize]="collectionSize"
+          [(page)]="page"
+          [pageSize]="pageSize"
+          (pageChange)="refreshCountries()"
+        >
+        </ngb-pagination>
+      
+        <select class="form-select mb-0 mb-sm-3" style="width: auto" [(ngModel)]="pageSize" (ngModelChange)="refreshCountries()">
+          <option [ngValue]="2">2 items per page</option>
+          <option [ngValue]="4">4 items per page</option>
+          <option [ngValue]="6">6 items per page</option>
+        </select>
+      </div>
+    </div>
+    <app-code-preview [codeContent]="paginationTableCode"></app-code-preview>
+    
+  </div>
+  <div class="col-xl-2 content-nav-wrapper">
+    <ul class="nav content-nav d-flex flex-column">
+      <li class="nav-item">
+        <a (click)="scrollTo(default)" class="nav-link">Basic example</a>
+      </li>
+      <li class="nav-item">
+        <a (click)="scrollTo(sortable)" class="nav-link">Sortable table</a>
+      </li>
+      <li class="nav-item">
+        <a (click)="scrollTo(searchFiltering)" class="nav-link">Search and filtering</a>
+      </li>
+      <li class="nav-item">
+        <a (click)="scrollTo(pagination)" class="nav-link">Pagination</a>
+      </li>
+    </ul>
+  </div>
+</div>

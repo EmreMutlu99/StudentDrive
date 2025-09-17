@@ -1,0 +1,14 @@
+# Dev container for Angular 18
+FROM node:20-alpine
+
+# Optional: tools you might need
+RUN apk add --no-cache git
+
+# Angular CLI 18.2.1
+RUN npm i -g @angular/cli@18.2.1
+
+# Workdir will be bind-mounted from host
+WORKDIR /workspace
+
+# Default: do nothing (Compose can override command)
+CMD ["sleep", "infinity"]

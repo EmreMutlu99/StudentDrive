@@ -1,0 +1,104 @@
+<nav class="sidebar">
+  <div class="sidebar-header">
+
+    <!--- Logo -->
+    <a routerLink="/" class="sidebar-brand">
+      Noble<span>UI</span>
+    </a>
+
+    <!-- <a routerLink="/" class="sidebar-brand">
+      <img src="images/logo.png" alt="logo">
+    </a> -->
+
+    <!--- Toggler -->
+    <div class="sidebar-toggler" #sidebarToggler (click)="toggleSidebar($event)">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+  </div>
+  <div class="sidebar-body" (mouseenter)="operSidebarFolded()" (mouseleave)="closeSidebarFolded()">
+
+    <!--- Sidemenu start -->
+
+    <ng-scrollbar orientation="vertical" appearance="compact">
+
+      <ul class="sidebar-nav metismenu" id="sidebar-menu" #sidebarMenu>
+
+        @for (item of menuItems; track item.label) {
+          
+          <!-- nav item title -->
+          @if (item.isTitle) {
+            <li class="nav-item nav-category">{{ item.label }}</li>
+          } 
+
+          <!-- nav item -->
+          @else {
+            <li class="nav-item">
+              <!-- nav item with submenu -->
+              @if (hasItems(item)) {
+                <a class="nav-link" href="javascript:void(0);">
+                  <i class="link-icon" [attr.data-feather]="item.icon" appFeatherIcon></i>
+                  <span class="link-title"> {{ item.label }}</span>
+                  <span class="link-arrow" data-feather="chevron-down" appFeatherIcon></span>
+                </a>
+                <ul class="sidebar-nav sub-menu nav-second-level" aria-expanded="false">
+                  @for (subitem of item.subItems; track subitem.label) {
+                    <li class="nav-item" [ngClass]="{'side-nav-item': hasItems(subitem)}">
+                      <!-- nav link with submenu -->
+                      @if (hasItems(subitem)) {
+                        <a class="nav-link side-nav-link-a-ref" href="javascript:void(0);">
+                          <span class="link-title"> {{ subitem.label }}</span>
+                          <span class="link-arrow" data-feather="chevron-down" appFeatherIcon></span>
+                        </a>
+                        <ul class="sidebar-nav sub-menu nav-third-level" aria-expanded="false">
+                          @for (subSubitem of subitem.subItems; track subSubitem.label) {
+                            <li class="nav-item">
+                              <a class="nav-link nav-link-ref" [routerLink]="subSubitem.link" [routerLinkActive]="['active']">
+                                {{ subSubitem.label }}
+                              </a>
+                            </li>
+                          }
+                        </ul>
+                      }
+                      <!-- nav link without submenu -->
+                      @else {
+                        <a class="nav-link nav-link-ref" [routerLink]="subitem.link">
+                          {{ subitem.label }}
+                        </a>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+              <!-- nav item without submenu -->
+              @else {
+                <a class="nav-link nav-link-ref" [routerLink]="item.link">
+                  <i class="link-icon" [attr.data-feather]="item.icon" appFeatherIcon></i>
+                  <span class="link-title"> {{ item.label }}</span>
+                  @if (item.badge) {
+                    <span class="badge bg-{{item.badge.variant}}">{{item.badge.text}}</span>
+                  }
+                </a>
+              }
+            </li>
+          }
+        
+        }
+
+        <li class="nav-item nav-category">Docs</li>
+        <li class="nav-item">
+          <a href="https://www.nobleui.com/angular/documentation/" target="_blank" class="nav-link">
+            <i class="link-icon" data-feather="hash" appFeatherIcon></i>
+            <span class="link-title">Documentation</span>
+          </a>
+        </li>
+      </ul>
+
+    </ng-scrollbar>
+
+    <!--- Sidemenu end -->
+
+  </div>
+</nav>

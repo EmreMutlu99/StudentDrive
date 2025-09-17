@@ -1,0 +1,79 @@
+<div class="row">
+  <div class="col-xl-10 main-content ps-xl-4 pe-xl-5">
+    <h1 class="page-title">Offcanvas</h1>
+    <p class="lead">Build hidden sidebars into your project for navigation, shopping carts, and more. Read the <a href="https://ng-bootstrap.github.io/#/components/offcanvas/examples" target="_blank">Official Ng-Bootstrap Documentation</a> for a full list of instructions and other options.</p>
+    
+    <hr>
+    
+    <h4 #default>Basic example</h4>
+    <div class="example">
+      <ng-template #content let-offcanvas>
+        <div class="offcanvas-header">
+          <h4 class="offcanvas-title" id="offcanvas-basic-title">Profile update</h4>
+          <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss('Cross click')"></button>
+        </div>
+        <div class="offcanvas-body">
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente veniam eaque nam, sequi voluptatum accusantium commodi repellat dolores corporis eius omnis cupiditate facilis reprehenderit et eum laudantium maxime itaque! Odio?</p>
+          <div class="text-end">
+            <button type="button" class="btn btn-outline-secondary" (click)="offcanvas.close('Save click')">Save</button>
+          </div>
+        </div>
+      </ng-template>
+      
+      <button class="btn btn-outline-primary" (click)="openBasicOffcanvas(content)">Launch demo offcanvas</button>
+      
+      @if (closeResult) {
+        <hr />
+        <p>{{ closeResult }}</p>
+      }
+    </div>
+    <app-code-preview [codeContent]="defaultOffcanvasCode"></app-code-preview>
+
+    <hr>
+
+    <h4 #options>Offcanvas options</h4>
+    <div class="example">
+      <ng-template #content2 let-offcanvas>
+        <div class="offcanvas-header">
+          <h4 class="offcanvas-title">Offcanvas title</h4>
+          <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss('Cross click')"></button>
+        </div>
+        <div class="offcanvas-body">
+          <p>One fine body&hellip;</p>
+          <div class="text-end">
+            <button type="button" class="btn btn-outline-secondary" (click)="offcanvas.close('Close click')">Close</button>
+          </div>
+        </div>
+      </ng-template>
+      
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openEndOffcanvas(content2)">Right position</button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openTopOffcanvas(content2)">Top position</button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openBottomOffcanvas(content2)">Bottom position</button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openNoBackdropOffcanvas(content2)">No backdrop</button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openStaticBackdropOffcanvas(content2)">Static backdrop</button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openScrollOffcanvas(content2)">
+        Scrolling of main content enabled
+      </button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openNoKeyboardOffcanvas(content2)">
+        Escape does not dismiss
+      </button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openNoAnimationOffcanvas(content2)">No animation</button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openCustomBackdropClassOffcanvas(content2)">
+        Custom backdrop class
+      </button>
+      <button class="btn btn-lg btn-outline-primary mb-2 me-2" (click)="openCustomPanelClassOffcanvas(content2)">
+        Custom panel class
+      </button>      
+    </div>
+    <app-code-preview [codeContent]="offcanvasOptionsCode"></app-code-preview>
+
+  </div>
+  <div class="col-xl-2 content-nav-wrapper">
+    <ul class="nav content-nav d-flex flex-column">
+      <li class="nav-item">
+        <a (click)="scrollTo(default)" class="nav-link">Basic example</a>
+        <a (click)="scrollTo(options)" class="nav-link">Offcanvas options</a>
+      </li>
+    </ul>
+  </div>
+</div>
