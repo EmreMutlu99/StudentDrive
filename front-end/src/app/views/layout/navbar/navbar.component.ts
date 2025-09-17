@@ -73,7 +73,7 @@ export class NavbarComponent implements OnInit {
 
     localStorage.setItem('isLoggedin', 'false');
     if (localStorage.getItem('isLoggedin') === 'false') {
-      this.router.navigate(['/auth/login']);
+      this.router.navigate(['/auth/landing']);
     }
   }
 
