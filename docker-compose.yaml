@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: jirc_user
+      POSTGRES_PASSWORD: jirc_pass
+      POSTGRES_DB: jirc_db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # In production you usually don't expose the DB publicly.
+    # Uncomment the next lines only if you need local access from host:
+    # ports:
+    #   - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jirc_user -d jirc_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://jirc_user:jirc_pass@db:5432/jirc_db
+      JWT_SECRET: super-secret
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    # If your backend Dockerfile already has CMD ["npm","start"], you can omit this.
+    # command: npm run start
+
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"   # open http://localhost:8080
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/ || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  db-data:
