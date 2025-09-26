@@ -1,18 +1,27 @@
 // back-end/server.js
-const http = require("http");
+const express = require('express');
+const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
 
+// Load env
+dotenv.config();
+
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer((req, res) => {
-  if (req.url === "/health") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify({ status: "ok" }));
-  }
+// Middleware
+app.use(bodyParser.json());
 
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("Hello from backend server!\n");
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
-server.listen(PORT, () => {
+// ✅ Import Google auth route
+const googleAuthRoute = require('./src/api/auth/google/google_auth');
+app.use('/api/auth/google', googleAuthRoute);
+
+// Start server
+app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

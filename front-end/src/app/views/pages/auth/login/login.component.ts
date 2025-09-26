@@ -1,13 +1,15 @@
 import { NgStyle } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { GoogleButtonComponent } from './google-login/google-login.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     NgStyle,
-    RouterLink
+    RouterLink,
+    GoogleButtonComponent
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'

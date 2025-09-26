@@ -4,8 +4,8 @@
       <div class="card">
         <div class="row">
           <div class="col-md-4 pe-md-0">
-            <div class="auth-side-wrapper" [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }">
-  
+            <div class="auth-side-wrapper" 
+                 [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }">
             </div>
           </div>
           <div class="col-md-8 ps-md-0">
@@ -31,8 +31,13 @@
                   <button type="submit" class="btn btn-primary me-2 mb-2 mb-md-0" (click)="onLoggedin($event)">Login</button>
                   <button type="button" class="btn btn-outline-primary btn-icon-text mb-2 mb-md-0">
                     <i class="feather icon-twitter btn-icon-prepend"></i>
-                    Login with twitter
+                    Login with Twitter
                   </button>
+
+                  <!-- ✅ Google sign-in button -->
+                  <div class="mt-2">
+                    <app-google-button></app-google-button>
+                  </div>
                 </div>
                 <a routerLink="/auth/register" class="d-block mt-3 text-secondary">Not a user? Sign up</a>
               </form>
