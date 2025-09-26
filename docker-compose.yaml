@@ -40,6 +40,7 @@ services:
       timeout: 3s
       retries: 10
       start_period: 15s
+    command: sh -c "npx prisma migrate deploy && node dist/index.js"
     # If your backend Dockerfile already has CMD ["npm","start"], you can omit this.
     # command: npm run start
 

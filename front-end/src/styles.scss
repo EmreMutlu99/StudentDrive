@@ -25,3 +25,146 @@
 
 // NobleUI styles for RTL layout. Replace the above style with this CSS file to enable RTL styles
 // @import "./styles/rtl-css/styles.rtl.css";
+/* ===== Studydrive-ish theme tokens ===== */
+:root {
+    --sd-bg:           #f5f7fb;   /* page */
+    --sd-surface:      #ffffff;   /* cards */
+    --sd-primary:      #2f80ff;   /* main blue */
+    --sd-primary-600:  #2b6ef2;
+    --sd-primary-100:  #e8f0ff;
+    --sd-text:         #1b2637;
+    --sd-text-2:       #6b778c;
+    --sd-border:       #e6ebf2;
+    --sd-success:      #00c48c;
+    --sd-danger:       #ff5a67;
+    --sd-warning:      #ffb020;
+  }
+  
+  /* Page */
+  body, .content-wrapper, .page-content {
+    background: var(--sd-bg) !important;
+    color: var(--sd-text);
+  }
+  
+  /* Cards: softer, floaty */
+  .card {
+    background: var(--sd-surface);
+    border: 1px solid var(--sd-border);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(21, 34, 50, 0.06);
+  }
+  .card .card-title {
+    font-weight: 700;
+    color: var(--sd-text);
+  }
+  
+  /* Headings */
+  h4, h5, h6 {
+    letter-spacing: .2px;
+  }
+  
+  /* Inputs */
+  .form-control {
+    border-radius: 12px;
+    border-color: var(--sd-border);
+    background: #fff;
+  }
+  .form-control:focus {
+    box-shadow: 0 0 0 3px var(--sd-primary-100);
+    border-color: var(--sd-primary);
+  }
+  
+  /* Buttons: pill, ghost defaults */
+  .btn {
+    border-radius: 999px;
+    padding: .5rem 1rem;
+    font-weight: 600;
+    border-width: 1px;
+  }
+  .btn-primary {
+    background: var(--sd-primary);
+    border-color: var(--sd-primary);
+  }
+  .btn-primary:hover { background: var(--sd-primary-600); }
+  
+  .btn-outline-primary {
+    color: var(--sd-primary);
+    background: #fff;
+    border-color: var(--sd-primary);
+  }
+  .btn-outline-primary:hover {
+    background: var(--sd-primary-100);
+    color: var(--sd-primary-600);
+  }
+  
+  /* Icon buttons look like Studydrive chips */
+  .btn-icon,
+  .btn-icon-text .btn-icon-prepend {
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  /* “Action” kebab spacing */
+  .no-dropdown-toggle-icon {
+    color: var(--sd-text-2);
+    padding: 6px 8px;
+    border-radius: 10px;
+  }
+  .no-dropdown-toggle-icon:hover {
+    background: var(--sd-primary-100);
+    color: var(--sd-primary);
+  }
+  
+  /* Badges → softer pills */
+  .badge {
+    padding: .375rem .625rem;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+  .bg-danger    { background: #ffe9ec !important; color: #c70024; }
+  .bg-success   { background: #e8fbf5 !important; color: #0a8f6a; }
+  .bg-info      { background: #e9f4ff !important; color: #2f80ff; }
+  .bg-warning   { background: #fff6e6 !important; color: #b36a00; }
+  .bg-primary   { background: var(--sd-primary) !important; }
+  
+  /* Table: flat, roomy */
+  .table {
+    --bs-table-striped-bg: transparent;
+    --bs-table-hover-bg: #f2f6ff;
+    color: var(--sd-text);
+  }
+  .table thead th {
+    border: 0;
+    color: var(--sd-text-2);
+    font-weight: 700;
+    text-transform: none;
+  }
+  .table tbody td {
+    border-top: 1px solid var(--sd-border);
+    vertical-align: middle;
+    padding: .9rem .75rem;
+  }
+  .table-hover > tbody > tr:hover > * {
+    background: #f2f6ff;
+  }
+  
+  /* ApexCharts spacing to breathe */
+  .apexcharts-canvas {
+    margin-top: .25rem;
+  }
+  
+  /* Top toolbar (search/date/ctas) */
+  .dashboard-toolbar {
+    background: linear-gradient(180deg, #eaf2ff 0%, rgba(234, 242, 255, 0) 100%);
+    border: 1px solid var(--sd-border);
+    border-radius: 16px;
+    padding: 12px;
+  }
+  
+  /* Small utilities */
+  .fs-10px { font-size: 10px; }
+  .fs-12px { font-size: 12px; }
+  .fs-13px { font-size: 13px; }
+  .w-200px { width: 200px; }
+  
