@@ -3,8 +3,16 @@
   "version": "3.0.0",
   "scripts": {
     "ng": "ng",
+
+    "prestart": "node set-env.js",
     "start": "ng serve",
+
+    "prebuild": "node set-env.js",
     "build": "ng build",
+
+    "start:prod": "ENV_FILE=.env.prod node set-env.js && ng serve --configuration production",
+    "build:prod": "ENV_FILE=.env.prod node set-env.js && ng build --configuration production",
+
     "watch": "ng build --watch --configuration development",
     "rtl": "webpack --config rtl.config.js",
     "test": "ng test"
@@ -67,6 +75,8 @@
     "@types/feather-icons": "^4.29.4",
     "@types/jasmine": "~5.1.0",
     "@types/sortablejs": "^1.15.8",
+    "dotenv": "^17.2.2",
+    "dotenv-expand": "^12.0.3",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

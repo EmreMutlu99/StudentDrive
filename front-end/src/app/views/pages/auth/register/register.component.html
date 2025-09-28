@@ -4,40 +4,68 @@
       <div class="card">
         <div class="row">
           <div class="col-md-4 pe-md-0">
-            <div class="auth-side-wrapper" [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }">
-  
-            </div>
+            <div class="auth-side-wrapper" [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }"></div>
           </div>
+
           <div class="col-md-8 ps-md-0">
             <div class="auth-form-wrapper px-4 py-5">
-              <a routerLink="." class="nobleui-logo d-block mb-2">Noble<span>UI</span></a>
+              <a routerLink="/" class="nobleui-logo d-block mb-2">Noble<span>UI</span></a>
               <h5 class="text-secondary fw-normal mb-4">Create a free account.</h5>
-              <form class="forms-sample">
+
+              <!-- error -->
+              <div *ngIf="errorMsg" class="alert alert-danger py-2">{{ errorMsg }}</div>
+
+              <form class="forms-sample" [formGroup]="form" (ngSubmit)="onSubmit()">
                 <div class="mb-3">
-                  <label for="exampleInputUsername1" class="form-label">Username</label>
-                  <input type="text" class="form-control" id="exampleInputUsername1" autocomplete="Username" placeholder="Username">
+                  <label class="form-label" for="username">Username <span class="text-muted">(optional)</span></label>
+                  <input id="username" type="text" class="form-control"
+                         formControlName="username" placeholder="your.handle" autocomplete="username">
+                  <div class="text-danger small mt-1" *ngIf="f.username.touched && f.username.invalid">
+                    3–20 chars, letters/numbers/._-
+                  </div>
                 </div>
+
                 <div class="mb-3">
-                  <label for="exampleInputEmail1" class="form-label">Email address</label>
-                  <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                  <label class="form-label" for="displayName">Display name <span class="text-muted">(optional)</span></label>
+                  <input id="displayName" type="text" class="form-control"
+                         formControlName="displayName" placeholder="e.g. Emre">
                 </div>
+
                 <div class="mb-3">
-                  <label for="exampleInputPassword1" class="form-label">Password</label>
-                  <input type="password" class="form-control" id="exampleInputPassword1" autocomplete="current-password" placeholder="Password">
+                  <label class="form-label" for="email">Email address</label>
+                  <input id="email" type="email" class="form-control"
+                         formControlName="email" placeholder="Email" autocomplete="email" required>
+                  <div class="text-danger small mt-1" *ngIf="f.email.touched && f.email.invalid">
+                    Please enter a valid email.
+                  </div>
                 </div>
+
+                <div class="mb-3">
+                  <label class="form-label" for="password">Password</label>
+                  <input id="password" type="password" class="form-control"
+                         formControlName="password" placeholder="Password" autocomplete="new-password" required>
+                  <div class="text-danger small mt-1" *ngIf="f.password.touched && f.password.errors?.['minlength']">
+                    Minimum 6 characters.
+                  </div>
+                </div>
+
                 <div class="form-check mb-3">
-                  <input type="checkbox" class="form-check-input" id="authCheck">
-                  <label class="form-check-label" for="authCheck">
-                    Remember me
-                  </label>
+                  <input id="authCheck" class="form-check-input" type="checkbox" formControlName="remember">
+                  <label class="form-check-label" for="authCheck">Remember me</label>
                 </div>
+
                 <div>
-                  <button type="submit" class="btn btn-primary me-2 mb-2 mb-md-0" (click)="onRegister($event)">Sign up</button>
-                  <button type="button" class="btn btn-outline-primary btn-icon-text mb-2 mb-md-0">
+                  <button type="submit" class="btn btn-primary me-2 mb-2 mb-md-0" [disabled]="loading || form.invalid">
+                    <span *ngIf="!loading">Sign up</span>
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+                  </button>
+
+                  <button type="button" class="btn btn-outline-primary btn-icon-text mb-2 mb-md-0" disabled>
                     <i class="feather icon-twitter btn-icon-prepend"></i>
-                    Sign up with twitter
+                    Sign up with Twitter
                   </button>
                 </div>
+
                 <a routerLink="/auth/login" class="d-block mt-3 text-secondary">Already a user? Sign in</a>
               </form>
             </div>

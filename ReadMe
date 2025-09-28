@@ -1,0 +1,66 @@
+
+````markdown
+## 🎨 Front-End (Angular 18)
+
+**Path:** `front-end/`
+
+### 1. Install dependencies
+```bash
+cd front-end
+npm install
+````
+
+### 2. Environment setup
+
+Create a `.env` file inside `front-end/`:
+
+```ini
+PRODUCTION=false
+BASE_URL=http://localhost:3000
+LANGUAGE=en
+GOOGLE_CLIENT_ID=your-google-client-id
+```
+
+When you run `npm start` or `npm run build`, the script **`set-env.js`** will automatically generate:
+
+* `src/environments/environment.ts`
+* `src/environments/environment.prod.ts`
+
+### 3. Run development server
+
+```bash
+npm start
+```
+
+### 4. Build for production
+
+```bash
+npm run build:prod
+```
+
+```
+
+## 📦 Prisma (Database ORM)
+
+This project uses **[Prisma](https://www.prisma.io/)** as the ORM for PostgreSQL.
+
+- **Schema location**: `back-end/prisma/schema.prisma`  
+- **Generated client**: `back-end/src/generated/prisma`  
+- **Environment variables**: configured via `.env` (`DATABASE_URL` must point to Postgres)  
+
+### 🔧 Common commands
+
+Run these from the `back-end/` directory:
+
+```bash
+# Generate Prisma client (after editing schema.prisma)
+npx prisma generate
+
+# Create & apply a new migration
+npx prisma migrate dev --name init
+
+# Deploy migrations in production
+npx prisma migrate deploy
+
+# View database in Prisma Studio (handy admin UI)
+npx prisma studio
