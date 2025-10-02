@@ -11,7 +11,6 @@ const ttlDays = 30;
 function pickRegistrationData(body) {
   const email = (body.email || '').toLowerCase().trim();
   const password = body.password || '';
-  const displayName = body.displayName?.trim() || null;
   const username = body.username?.trim() || null;          // unique (optional)
   const avatarUrl = body.avatarUrl?.trim() || null;        // optional
   const startSemester = body.startSemester?.trim() || null;// e.g. "WS2024/25"
@@ -20,26 +19,22 @@ function pickRegistrationData(body) {
   const universityId = body.universityId || null;
   const facultyId = body.facultyId || null;
 
-  return { email, password, displayName, username, avatarUrl, startSemester, universityId, facultyId };
+  return { email, password, username, avatarUrl, startSemester, universityId, facultyId };
 }
 
-// POST /api/auth/register
+// src/api/auth/auth.js
 router.post('/register', async (req, res) => {
   try {
-    const {
-      email, password, displayName, username, avatarUrl, startSemester, universityId, facultyId
-    } = pickRegistrationData(req.body);
+    const { email, password, username, avatarUrl, startSemester, universityId, facultyId } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'email and password are required' });
     }
 
-    // (Optional) quick sanity checks — tweak as you like
     if (username && !/^[a-zA-Z0-9._-]{3,20}$/.test(username)) {
       return res.status(400).json({ error: 'username must be 3–20 chars: letters, numbers, . _ -' });
     }
 
-    // If client passed universityId/facultyId, make sure they exist (avoid FK errors)
     if (universityId) {
       const uni = await prisma.university.findUnique({ where: { id: universityId } });
       if (!uni) return res.status(400).json({ error: 'invalid universityId' });
@@ -53,34 +48,36 @@ router.post('/register', async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email.toLowerCase().trim(),
+        username: username?.trim() || null,
         passwordHash,
-        displayName,
-        username,
         avatarUrl,
         startSemester,
         universityId,
-        facultyId,
-        // role, isActive, emailVerified use defaults from schema
+        facultyId
       },
       select: {
-        id: true, email: true, displayName: true, username: true,
-        avatarUrl: true, startSemester: true, universityId: true, facultyId: true,
+        id: true,
+        email: true,
+        username: true,
+        avatarUrl: true,
+        startSemester: true,
+        universityId: true,
+        facultyId: true,
         createdAt: true
       }
     });
 
     return res.status(201).json(user);
   } catch (e) {
-    // Unique constraint violations (email or username)
     if (e?.code === 'P2002') {
-      const target = e.meta?.target?.join?.(',') || 'unique field';
-      return res.status(409).json({ error: `${target} already in use` });
+      return res.status(409).json({ error: 'email or username already in use' });
     }
     console.error('Register error:', e);
     return res.status(500).json({ error: 'internal error' });
   }
 });
+
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {

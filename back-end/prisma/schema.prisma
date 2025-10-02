@@ -22,9 +22,8 @@ enum Role {
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
-  username      String?  @unique
+  username      String?  @unique   // keep this
   passwordHash  String
-  displayName   String?
   avatarUrl     String?
   role          Role     @default(USER)
   isActive      Boolean  @default(true)
@@ -35,7 +34,7 @@ model User {
   university    University? @relation(fields: [universityId], references: [id])
   faculty       Faculty?    @relation(fields: [facultyId], references: [id])
 
-  startSemester String?                       // NEW: e.g. "WS2024/25" or "SS2025"
+  startSemester String?
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

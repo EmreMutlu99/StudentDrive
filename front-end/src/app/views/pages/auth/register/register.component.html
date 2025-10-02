@@ -1,77 +1,279 @@
-<div class="container">
-  <div class="row w-100 mx-0 auth-page">
-    <div class="col-md-8 col-xl-6 mx-auto">
-      <div class="card">
-        <div class="row">
-          <div class="col-md-4 pe-md-0">
-            <div class="auth-side-wrapper" [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }"></div>
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <a routerLink="/" class="nobleui-logo fw-bold text-decoration-none">
+      Student<span>Drive</span>
+    </a>
+    <a routerLink="/auth/login" class="btn btn-outline-secondary">Log in</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-4 p-md-5">
+      <!-- Stepper -->
+      <div class="stepper mb-4 d-flex align-items-center gap-3">
+        <div
+          class="step d-flex align-items-center gap-2"
+          [class.active]="step >= 1"
+        >
+          <div class="bubble">1</div>
+          <div class="label">Account</div>
+        </div>
+        <div
+          class="flex-grow-1"
+          style="height: 2px; background: var(--bs-border-color)"
+        ></div>
+        <div
+          class="step d-flex align-items-center gap-2"
+          [class.active]="step >= 2"
+        >
+          <div class="bubble">2</div>
+          <div class="label">Academic</div>
+        </div>
+        <div
+          class="flex-grow-1"
+          style="height: 2px; background: var(--bs-border-color)"
+        ></div>
+        <div
+          class="step d-flex align-items-center gap-2"
+          [class.active]="step >= 3"
+        >
+          <div class="bubble">3</div>
+          <div class="label">Review</div>
+        </div>
+      </div>
+
+      <div *ngIf="serverError" class="alert alert-danger">
+        {{ serverError }}
+      </div>
+
+      <!-- Step 1 -->
+      <form *ngIf="step === 1" [formGroup]="account" (ngSubmit)="next()">
+        <div class="mb-3">
+          <label class="form-label" for="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            class="form-control"
+            formControlName="username"
+            placeholder="your.handle"
+            autocomplete="username"
+          />
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="username.touched && username.invalid"
+          >
+            3–20 chars. Letters, numbers, ., _, -
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="form-control"
+            formControlName="email"
+            placeholder="you@uni.edu"
+            autocomplete="email"
+          />
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="email.touched && email.invalid"
+          >
+            Please enter a valid email.
+          </div>
+        </div>
+
+        <div class="mb-3" formGroupName="passwordGroup">
+          <label class="form-label" for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            class="form-control"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="new-password"
+          />
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="password.touched && password.errors?.['minlength']"
+          >
+            Minimum 6 characters.
           </div>
 
-          <div class="col-md-8 ps-md-0">
-            <div class="auth-form-wrapper px-4 py-5">
-              <a routerLink="/" class="nobleui-logo d-block mb-2">Noble<span>UI</span></a>
-              <h5 class="text-secondary fw-normal mb-4">Create a free account.</h5>
-
-              <!-- error -->
-              <div *ngIf="errorMsg" class="alert alert-danger py-2">{{ errorMsg }}</div>
-
-              <form class="forms-sample" [formGroup]="form" (ngSubmit)="onSubmit()">
-                <div class="mb-3">
-                  <label class="form-label" for="username">Username <span class="text-muted">(optional)</span></label>
-                  <input id="username" type="text" class="form-control"
-                         formControlName="username" placeholder="your.handle" autocomplete="username">
-                  <div class="text-danger small mt-1" *ngIf="f.username.touched && f.username.invalid">
-                    3–20 chars, letters/numbers/._-
-                  </div>
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label" for="displayName">Display name <span class="text-muted">(optional)</span></label>
-                  <input id="displayName" type="text" class="form-control"
-                         formControlName="displayName" placeholder="e.g. Emre">
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label" for="email">Email address</label>
-                  <input id="email" type="email" class="form-control"
-                         formControlName="email" placeholder="Email" autocomplete="email" required>
-                  <div class="text-danger small mt-1" *ngIf="f.email.touched && f.email.invalid">
-                    Please enter a valid email.
-                  </div>
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label" for="password">Password</label>
-                  <input id="password" type="password" class="form-control"
-                         formControlName="password" placeholder="Password" autocomplete="new-password" required>
-                  <div class="text-danger small mt-1" *ngIf="f.password.touched && f.password.errors?.['minlength']">
-                    Minimum 6 characters.
-                  </div>
-                </div>
-
-                <div class="form-check mb-3">
-                  <input id="authCheck" class="form-check-input" type="checkbox" formControlName="remember">
-                  <label class="form-check-label" for="authCheck">Remember me</label>
-                </div>
-
-                <div>
-                  <button type="submit" class="btn btn-primary me-2 mb-2 mb-md-0" [disabled]="loading || form.invalid">
-                    <span *ngIf="!loading">Sign up</span>
-                    <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
-                  </button>
-
-                  <button type="button" class="btn btn-outline-primary btn-icon-text mb-2 mb-md-0" disabled>
-                    <i class="feather icon-twitter btn-icon-prepend"></i>
-                    Sign up with Twitter
-                  </button>
-                </div>
-
-                <a routerLink="/auth/login" class="d-block mt-3 text-secondary">Already a user? Sign in</a>
-              </form>
-            </div>
+          <label class="form-label mt-3" for="confirm">Confirm password</label>
+          <input
+            id="confirm"
+            type="password"
+            class="form-control"
+            formControlName="confirmPassword"
+            placeholder="Repeat password"
+            autocomplete="new-password"
+          />
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="pwdGroup.touched && pwdGroup.errors?.['passwordMismatch']"
+          >
+            Passwords do not match.
           </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-primary" type="submit">Continue</button>
+        </div>
+      </form>
+
+      <!-- Step 2 -->
+      <form *ngIf="step === 2" [formGroup]="academic" (ngSubmit)="next()">
+        <div class="mb-3">
+          <label class="form-label" for="university">University</label>
+          <select
+            id="university"
+            class="form-select"
+            formControlName="universityId"
+          >
+            <option value="" disabled>Select your university</option>
+            <option *ngFor="let u of universities" [value]="u.id">
+              {{ u.name }}
+            </option>
+          </select>
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="
+              academic.get('universityId')?.touched &&
+              academic.get('universityId')?.invalid
+            "
+          >
+            Please select your university.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="faculty">Faculty</label>
+          <select
+            id="faculty"
+            class="form-select"
+            formControlName="facultyId"
+            [disabled]="!faculties.length"
+          >
+            <option value="" disabled>Select your faculty</option>
+            <option *ngFor="let f of faculties" [value]="f.id">
+              {{ f.name }}
+            </option>
+          </select>
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="
+              academic.get('facultyId')?.touched &&
+              academic.get('facultyId')?.invalid
+            "
+          >
+            Please select your faculty.
+          </div>
+
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="
+              academic.get('facultyId')?.touched &&
+              academic.get('facultyId')?.hasError('facultyMismatch')
+            "
+          >
+            Selected faculty doesn’t belong to the chosen university.
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Semester</label>
+            <select class="form-select" formControlName="semesterType">
+              <option value="WS">Winter (WS)</option>
+              <option value="SS">Summer (SS)</option>
+            </select>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Start year</label>
+            <input
+              type="number"
+              class="form-control"
+              formControlName="startYear"
+            />
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button class="btn btn-light" type="button" (click)="back()">
+            Back
+          </button>
+          <button class="btn btn-primary" type="submit">Continue</button>
+        </div>
+      </form>
+
+      <!-- Step 3 -->
+      <div *ngIf="step === 3" [formGroup]="profile">
+        <div class="form-check mb-3">
+          <input
+            id="tos"
+            type="checkbox"
+            class="form-check-input"
+            formControlName="acceptTos"
+          />
+          <label for="tos" class="form-check-label"
+            >I agree to the Terms & Privacy Policy.</label
+          >
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="
+              profile.get('acceptTos')?.touched &&
+              profile.get('acceptTos')?.invalid
+            "
+          >
+            You must accept to continue.
+          </div>
+        </div>
+
+        <div class="border rounded p-3 mb-3 bg-body-tertiary">
+          <h6 class="mb-2">Summary</h6>
+          <ul class="m-0 small">
+            <li>
+              <strong>Username:</strong> {{ account.get("username")?.value }}
+            </li>
+            <li><strong>Email:</strong> {{ account.get("email")?.value }}</li>
+            <li>
+              <strong>University:</strong>
+              {{ getUniversityName(academic.get("universityId")?.value) }}
+            </li>
+            <li>
+              <strong>Faculty:</strong>
+              {{ getFacultyName(academic.get("facultyId")?.value) }}
+            </li>
+            <li>
+              <strong>Start semester:</strong>
+              {{ academic.get("semesterType")?.value }}
+              {{ academic.get("startYear")?.value }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <button class="btn btn-light" type="button" (click)="back()">
+            Back
+          </button>
+          <button
+            class="btn btn-primary"
+            [disabled]="loading || profile.invalid"
+            (click)="submit()"
+          >
+            <span *ngIf="!loading">Create account</span>
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm"
+            ></span>
+          </button>
         </div>
       </div>
     </div>
   </div>
+
+  <p class="text-center text-muted small mt-3">
+    Already have an account? <a routerLink="/auth/login">Log in</a>
+  </p>
 </div>

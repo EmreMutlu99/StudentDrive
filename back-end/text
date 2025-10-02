@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String?  @unique
+  passwordHash  String
+  displayName   String?
+  avatarUrl     String?
+  role          Role     @default(USER)
+  isActive      Boolean  @default(true)
+  emailVerified Boolean  @default(false)
+
+  universityId  String?
+  facultyId     String?
+  university    University? @relation(fields: [universityId], references: [id])
+  faculty       Faculty?    @relation(fields: [facultyId], references: [id])
+
+  startSemester String?                       // NEW: e.g. "WS2024/25" or "SS2025"
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions      Session[]
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  lastSeenAt  DateTime?
+  userAgent   String?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model University {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  country   String?
+  city      String?
+  createdAt DateTime @default(now())
+
+  faculties Faculty[]
+  users     User[]
+}
+
+model Faculty {
+  id            String   @id @default(cuid())
+  universityId  String
+  university    University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  name          String
+
+  users         User[]
+
+  @@unique([universityId, name])
+}
