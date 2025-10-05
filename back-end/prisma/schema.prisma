@@ -24,16 +24,17 @@ model User {
   isActive         Boolean  @default(true)
   emailVerified    Boolean  @default(false)
 
+  // keep string FK for University (see note below)
   universityId     String?
-  degreeProgramId  String?                 // ← was facultyId
-  university       University? @relation(fields: [universityId], references: [id])
+  // 🔧 make this UUID to match DegreeProgram.id
+  degreeProgramId  String?  @db.Uuid
+
+  university       University?   @relation(fields: [universityId], references: [id])
   degreeProgram    DegreeProgram? @relation(fields: [degreeProgramId], references: [id])
 
   startSemester    String?
-
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-
   sessions         Session[]
 }
 
@@ -52,30 +53,37 @@ model Session {
 }
 
 model University {
-  id              String   @id @default(cuid())
-  name            String   @unique
-  country         String?
-  city            String?
-  createdAt       DateTime @default(now())
+  // If you want human slugs like "rwth", make this a plain string with NO default:
+  id        String   @id @db.Text            // ← no @default(cuid())
+  name      String   @unique
+  country   String?
+  city      String?
+  createdAt DateTime @default(now())
 
-  degreePrograms  DegreeProgram[]         // ← was faculties
+  degreePrograms  DegreeProgram[]
   users           User[]
 }
 
 model DegreeProgram {
-  id              String     @id @default(uuid())           // ✅ auto-UUID
-  universityId    String
-  university      University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  id             String     @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  universityId   String
+  university     University @relation(fields: [universityId], references: [id], onDelete: Cascade)
 
-  name            String
-  degree          String
-  language        String?
-  startSemesters  String?
-  nc              String?
+  name           String
+  degree         String
+  language       String?
+  startSemesters String?
+  nc             String?
+  users          User[]
 
-  // ✅ back-relation to User (this was missing)
-  users           User[]
-
-  // Useful uniqueness across a uni
   @@unique([universityId, name, degree])
+}
+
+model EmailVerification {
+  email       String   @id
+  codeHash    String
+  payloadJson String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  lastSentAt  DateTime @default(now())
 }
