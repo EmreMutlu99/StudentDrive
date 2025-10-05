@@ -1,60 +1,108 @@
 const express = require('express');
-const { prisma } = require('../../../prisma'); // adjust if your prisma.js lives elsewhere
+const rateLimit = require('express-rate-limit');             // ← NEW
+const { prisma } = require('../../../prisma');
 const argon2 = require('argon2');
 
 const router = express.Router();
 const ttlDays = 30;
 
-/**
- * Helper: pick only allowed fields to prevent clients from setting role/isActive/etc.
- */
+/* -------------------- Rate limit: /register -------------------- */
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,                   // 20 attempts per IP per window
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/* --------------- Whitelist input (no mass assignment) ----------- */
 function pickRegistrationData(body) {
   const email = (body.email || '').toLowerCase().trim();
   const password = body.password || '';
-  const username = body.username?.trim() || null;          // unique (optional)
-  const avatarUrl = body.avatarUrl?.trim() || null;        // optional
-  const startSemester = body.startSemester?.trim() || null;// e.g. "WS2024/25"
-
-  // IDs are optional. If provided, we just set them (no create).
-  const universityId = body.universityId || null;
-  const facultyId = body.facultyId || null;
-
+  const username = body.username?.trim() || null;           // unique (optional)
+  const avatarUrl = body.avatarUrl?.trim() || null;         // optional
+  const startSemester = body.startSemester?.trim() || null; // e.g. "WS2024/25"
+  const universityId = body.universityId || null;           // optional
+  const facultyId = body.facultyId || null;                 // optional
   return { email, password, username, avatarUrl, startSemester, universityId, facultyId };
 }
 
-// src/api/auth/auth.js
-router.post('/register', async (req, res) => {
-  try {
-    const { email, password, username, avatarUrl, startSemester, universityId, facultyId } = req.body;
+/* --------- Integrity check: faculty must belong to uni ---------- */
+async function facultyBelongsToUniversity(facultyId, universityId) {
+  if (!facultyId || !universityId) return true; // nothing to validate if one is missing
+  const fac = await prisma.faculty.findFirst({
+    where: { id: facultyId, universityId },
+    select: { id: true },
+  });
+  return !!fac;
+}
 
+/* =========================== REGISTER =========================== */
+// POST /api/auth/register
+router.post('/register', registerLimiter, async (req, res) => {
+  try {
+    console.log("/register : ", req.body);
+    // 1) pick only allowed fields
+    const {
+      email, password, username, avatarUrl,
+      startSemester, universityId, facultyId
+    } = pickRegistrationData(req.body);
+
+    // 2) basic validation (no Zod version)
     if (!email || !password) {
       return res.status(400).json({ error: 'email and password are required' });
     }
-
+    // email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'invalid email' });
+    }
+    // password length
+    if (password.length < 6 || password.length > 200) {
+      return res.status(400).json({ error: 'password must be 6–200 characters' });
+    }
+    // username rules (if provided)
     if (username && !/^[a-zA-Z0-9._-]{3,20}$/.test(username)) {
       return res.status(400).json({ error: 'username must be 3–20 chars: letters, numbers, . _ -' });
     }
+    // avatarUrl (if provided)
+    if (avatarUrl && !/^https?:\/\/.+/i.test(avatarUrl)) {
+      return res.status(400).json({ error: 'avatarUrl must be a valid URL' });
+    }
 
+    // 3) integrity: check referenced ids exist + belong together
     if (universityId) {
-      const uni = await prisma.university.findUnique({ where: { id: universityId } });
+      const uni = await prisma.university.findUnique({ where: { id: universityId }, select: { id: true } });
       if (!uni) return res.status(400).json({ error: 'invalid universityId' });
     }
     if (facultyId) {
-      const fac = await prisma.faculty.findUnique({ where: { id: facultyId } });
-      if (!fac) return res.status(400).json({ error: 'invalid facultyId' });
+      const facExists = await prisma.faculty.findUnique({ where: { id: facultyId }, select: { id: true, universityId: true } });
+      if (!facExists) return res.status(400).json({ error: 'invalid facultyId' });
+    }
+    const ok = await facultyBelongsToUniversity(facultyId, universityId);
+    if (!ok) {
+      return res.status(400).json({ error: 'Selected faculty does not belong to the chosen university.' });
     }
 
-    const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
+    // 4) hash password (argon2id, strong params)
+    const passwordHash = await argon2.hash(password, {
+      type: argon2.argon2id,
+      timeCost: 3,
+      memoryCost: 19456, // ~19MB
+      parallelism: 1,
+    });
 
+    // 5) create user
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase().trim(),
-        username: username?.trim() || null,
+        username: username || null,
         passwordHash,
         avatarUrl,
         startSemester,
         universityId,
-        facultyId
+        facultyId,
+        role: 'USER',
+        isActive: true,
+        emailVerified: false,
       },
       select: {
         id: true,
@@ -64,26 +112,34 @@ router.post('/register', async (req, res) => {
         startSemester: true,
         universityId: true,
         facultyId: true,
-        createdAt: true
+        createdAt: true,
       }
     });
 
+    // (We do NOT auto-login here; frontend can call /login next.)
     return res.status(201).json(user);
   } catch (e) {
     if (e?.code === 'P2002') {
-      return res.status(409).json({ error: 'email or username already in use' });
+      // Unique constraint (email or username)
+      const fields = Array.isArray(e.meta?.target) ? e.meta.target.join(', ') : 'email/username';
+      return res.status(409).json({ error: `${fields} already in use` });
     }
     console.error('Register error:', e);
     return res.status(500).json({ error: 'internal error' });
   }
 });
 
-
+/* ============================ LOGIN ============================= */
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   const email = (req.body.email || '').toLowerCase().trim();
   const password = req.body.password || '';
   if (!email || !password) return res.status(400).json({ error: 'email and password are required' });
+
+  // minimal email sanity
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'invalid email' });
+  }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return res.status(401).json({ error: 'invalid credentials' });
@@ -112,13 +168,19 @@ router.post('/login', async (req, res) => {
   res.json({
     ok: true,
     user: {
-      id: user.id, email: user.email, displayName: user.displayName,
-      username: user.username, avatarUrl: user.avatarUrl,
-      startSemester: user.startSemester, universityId: user.universityId, facultyId: user.facultyId
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      startSemester: user.startSemester,
+      universityId: user.universityId,
+      facultyId: user.facultyId
+      // displayName removed — not in your Prisma model
     }
   });
 });
 
+/* ============================== ME ============================== */
 // GET /api/auth/me
 router.get('/me', async (req, res) => {
   const sid = req.cookies?.sid;
@@ -141,13 +203,18 @@ router.get('/me', async (req, res) => {
 
   const u = s.user;
   res.json({
-    id: u.id, email: u.email, displayName: u.displayName,
-    username: u.username, avatarUrl: u.avatarUrl,
-    startSemester: u.startSemester, universityId: u.universityId, facultyId: u.facultyId,
+    id: u.id,
+    email: u.email,
+    username: u.username,
+    avatarUrl: u.avatarUrl,
+    startSemester: u.startSemester,
+    universityId: u.universityId,
+    facultyId: u.facultyId,
     createdAt: u.createdAt
   });
 });
 
+/* ============================ LOGOUT ============================ */
 // POST /api/auth/logout
 router.post('/logout', async (req, res) => {
   const sid = req.cookies?.sid;

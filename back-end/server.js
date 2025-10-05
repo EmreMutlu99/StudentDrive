@@ -12,7 +12,22 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:8080', credentials: true }));
+// ✅ trust first proxy (needed if running behind nginx/traefik, etc.)
+app.set('trust proxy', 1);
+
+// CORS first
+const allowedOrigins = ['http://localhost:4200','http://localhost:8080'];
+const corsOptions = {
+  origin(origin, cb) {
+    if (!origin) return cb(null, true);
+    return allowedOrigins.includes(origin) ? cb(null, true) : cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 

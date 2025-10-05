@@ -14,5 +14,21 @@ export default [
   {
     path: 'register',
     loadComponent: () => import('./register/register.component').then(c => c.RegisterComponent)
-  }
+  },
+  {
+    path: 'legal',
+    children: [
+      {
+        path: 'terms',
+        loadComponent: () =>
+          import('./legal/terms/terms.component').then(c => c.TermsComponent),
+      },
+      {
+        path: 'privacy',
+        loadComponent: () =>
+          import('./legal/privacy/privacy.component').then(c => c.PrivacyComponent),
+      },
+      { path: '', redirectTo: 'privacy', pathMatch: 'full' },
+    ],
+  },
 ] as Routes;

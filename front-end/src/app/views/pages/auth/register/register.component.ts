@@ -67,6 +67,8 @@ export class RegisterComponent implements OnInit {
   API_BASE = 'http://localhost:3000';
 
   step = 1;                // 1 = Account, 2 = Academic, 3 = Review
+  readonly totalSteps = 3; // used for progress percentage
+
   loading = false;
   serverError = '';
 
@@ -117,6 +119,16 @@ export class RegisterComponent implements OnInit {
   get pwdGroup() { return this.account.get('passwordGroup') as FormGroup; }
   get password() { return this.pwdGroup.get('password')!; }
   get confirm()  { return this.pwdGroup.get('confirmPassword')!; }
+
+  /** Progress % for the top progress bar (step 1 -> 0%, step 2 -> 50%, step 3 -> 100%) */
+  get progressPct(): number {
+    const pct = ((this.step - 1) / (this.totalSteps - 1)) * 100;
+    return Math.max(0, Math.min(100, pct));
+  }
+
+  /** (Optional) helpers if you want to “paint” the stepper connectors too */
+  get connector12Active(): boolean { return this.step >= 2; }
+  get connector23Active(): boolean { return this.step >= 3; }
 
   // --- Custom validator for coordinated faculty/university ---
   facultyMatchesUniversity(control: AbstractControl): ValidationErrors | null {
@@ -202,7 +214,7 @@ export class RegisterComponent implements OnInit {
     this.serverError = '';
     if (this.step === 1 && this.account.invalid) { this.account.markAllAsTouched(); return; }
     if (this.step === 2 && this.academic.invalid) { this.academic.markAllAsTouched(); return; }
-    this.step = Math.min(3, this.step + 1);
+    this.step = Math.min(this.totalSteps, this.step + 1);
   }
 
   back(): void {

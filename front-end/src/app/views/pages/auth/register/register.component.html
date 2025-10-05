@@ -8,39 +8,54 @@
 
   <div class="card shadow-sm">
     <div class="card-body p-4 p-md-5">
+      <!-- Progress -->
+      <div class="progress mb-3" style="height: 6px">
+        <div
+          class="progress-bar bg-primary"
+          role="progressbar"
+          [style.width.%]="progressPct"
+          [attr.aria-valuenow]="progressPct"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          style="transition: width 0.35s ease"
+        ></div>
+      </div>
+
       <!-- Stepper -->
       <div class="stepper mb-4 d-flex align-items-center gap-3">
-        <div
-          class="step d-flex align-items-center gap-2"
-          [class.active]="step >= 1"
-        >
+        <!-- Step 1 -->
+        <div class="step d-flex align-items-center gap-2" [class.active]="step >= 1">
           <div class="bubble">1</div>
           <div class="label">Account</div>
         </div>
+      
+        <!-- Connector 1→2 (paints when step >= 2) -->
         <div
           class="flex-grow-1"
-          style="height: 2px; background: var(--bs-border-color)"
+          [style.height.px]="2"
+          [style.background]="step >= 2 ? 'var(--bs-primary)' : 'var(--bs-border-color)'"
         ></div>
-        <div
-          class="step d-flex align-items-center gap-2"
-          [class.active]="step >= 2"
-        >
+      
+        <!-- Step 2 -->
+        <div class="step d-flex align-items-center gap-2" [class.active]="step >= 2">
           <div class="bubble">2</div>
           <div class="label">Academic</div>
         </div>
+      
+        <!-- Connector 2→3 (paints when step >= 3) -->
         <div
           class="flex-grow-1"
-          style="height: 2px; background: var(--bs-border-color)"
+          [style.height.px]="2"
+          [style.background]="step >= 3 ? 'var(--bs-primary)' : 'var(--bs-border-color)'"
         ></div>
-        <div
-          class="step d-flex align-items-center gap-2"
-          [class.active]="step >= 3"
-        >
+      
+        <!-- Step 3 -->
+        <div class="step d-flex align-items-center gap-2" [class.active]="step >= 3">
           <div class="bubble">3</div>
           <div class="label">Review</div>
         </div>
       </div>
-
+      
       <div *ngIf="serverError" class="alert alert-danger">
         {{ serverError }}
       </div>
@@ -216,15 +231,15 @@
             class="form-check-input"
             formControlName="acceptTos"
           />
-          <label for="tos" class="form-check-label"
-            >I agree to the Terms & Privacy Policy.</label
-          >
+          <label for="tos" class="form-check-label">
+            I agree to the
+            <a routerLink="/auth/legal/terms" target="_blank" rel="noopener">Terms of Service</a>
+            and
+            <a routerLink="/auth/legal/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+          </label>
           <div
             class="invalid-feedback d-block"
-            *ngIf="
-              profile.get('acceptTos')?.touched &&
-              profile.get('acceptTos')?.invalid
-            "
+            *ngIf="profile.get('acceptTos')?.touched && profile.get('acceptTos')?.invalid"
           >
             You must accept to continue.
           </div>
