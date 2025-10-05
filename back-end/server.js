@@ -5,8 +5,10 @@ const dotenv = require('dotenv');   // ← add this
 
 // Routes
 const googleAuthRoute = require('./src/api/auth/google/google_auth');
-const authRoute = require('./src/api/auth/auth');   // ✅ make sure this file exists (e.g. back-end/src/routes/auth.js)
-
+const authRoute = require('./src/api/auth/auth');   
+const universitiesRoute = require('./src/api/universities/universities');
+const degreeProgramsRoute = require('./src/api/degreePrograms/degreePrograms');
+const emailRouter = require("./src/api/email_sender/email_router");
 // Load env
 dotenv.config();
 
@@ -43,6 +45,9 @@ app.get('/health', (req, res) => {
 // ✅ Import Google auth route
 app.use('/auth/google', googleAuthRoute);
 app.use('/api/auth', authRoute);
+app.use('/api/universities', universitiesRoute);
+app.use('/api/degree-programs', degreeProgramsRoute);
+app.use("/api/email", emailRouter);
 
 // Start server
 app.listen(PORT, () => {

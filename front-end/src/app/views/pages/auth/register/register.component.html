@@ -1,4 +1,4 @@
-<div class="container py-4">
+<div class="container py-4" [formGroup]="form">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <a routerLink="/" class="nobleui-logo fw-bold text-decoration-none">
       Student<span>Drive</span>
@@ -28,34 +28,34 @@
           <div class="bubble">1</div>
           <div class="label">Account</div>
         </div>
-      
-        <!-- Connector 1→2 (paints when step >= 2) -->
+
+        <!-- Connector 1→2 -->
         <div
           class="flex-grow-1"
           [style.height.px]="2"
           [style.background]="step >= 2 ? 'var(--bs-primary)' : 'var(--bs-border-color)'"
         ></div>
-      
+
         <!-- Step 2 -->
         <div class="step d-flex align-items-center gap-2" [class.active]="step >= 2">
           <div class="bubble">2</div>
           <div class="label">Academic</div>
         </div>
-      
-        <!-- Connector 2→3 (paints when step >= 3) -->
+
+        <!-- Connector 2→3 -->
         <div
           class="flex-grow-1"
           [style.height.px]="2"
           [style.background]="step >= 3 ? 'var(--bs-primary)' : 'var(--bs-border-color)'"
         ></div>
-      
+
         <!-- Step 3 -->
         <div class="step d-flex align-items-center gap-2" [class.active]="step >= 3">
           <div class="bubble">3</div>
           <div class="label">Review</div>
         </div>
       </div>
-      
+
       <div *ngIf="serverError" class="alert alert-danger">
         {{ serverError }}
       </div>
@@ -72,10 +72,7 @@
             placeholder="your.handle"
             autocomplete="username"
           />
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="username.touched && username.invalid"
-          >
+          <div class="invalid-feedback d-block" *ngIf="username.touched && username.invalid">
             3–20 chars. Letters, numbers, ., _, -
           </div>
         </div>
@@ -90,10 +87,7 @@
             placeholder="you@uni.edu"
             autocomplete="email"
           />
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="email.touched && email.invalid"
-          >
+          <div class="invalid-feedback d-block" *ngIf="email.touched && email.invalid">
             Please enter a valid email.
           </div>
         </div>
@@ -108,10 +102,7 @@
             placeholder="••••••••"
             autocomplete="new-password"
           />
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="password.touched && password.errors?.['minlength']"
-          >
+          <div class="invalid-feedback d-block" *ngIf="password.touched && password.errors?.['minlength']">
             Minimum 6 characters.
           </div>
 
@@ -124,10 +115,7 @@
             placeholder="Repeat password"
             autocomplete="new-password"
           />
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="pwdGroup.touched && pwdGroup.errors?.['passwordMismatch']"
-          >
+          <div class="invalid-feedback d-block" *ngIf="pwdGroup.touched && pwdGroup.errors?.['passwordMismatch']">
             Passwords do not match.
           </div>
         </div>
@@ -139,60 +127,43 @@
 
       <!-- Step 2 -->
       <form *ngIf="step === 2" [formGroup]="academic" (ngSubmit)="next()">
+        <!-- University -->
         <div class="mb-3">
           <label class="form-label" for="university">University</label>
-          <select
-            id="university"
-            class="form-select"
-            formControlName="universityId"
-          >
+          <select id="university" class="form-select" formControlName="universityId">
             <option value="" disabled>Select your university</option>
             <option *ngFor="let u of universities" [value]="u.id">
               {{ u.name }}
             </option>
           </select>
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="
-              academic.get('universityId')?.touched &&
-              academic.get('universityId')?.invalid
-            "
-          >
+          <div class="invalid-feedback d-block"
+               *ngIf="academic.get('universityId')?.touched && academic.get('universityId')?.invalid">
             Please select your university.
           </div>
         </div>
 
+        <!-- Degree Program -->
         <div class="mb-3">
-          <label class="form-label" for="faculty">Faculty</label>
+          <label class="form-label" for="program">Degree program</label>
           <select
-            id="faculty"
+            id="program"
             class="form-select"
-            formControlName="facultyId"
-            [disabled]="!faculties.length"
-          >
-            <option value="" disabled>Select your faculty</option>
-            <option *ngFor="let f of faculties" [value]="f.id">
-              {{ f.name }}
+            formControlName="degreeProgramId"
+            [disabled]="!programs.length">
+            <option value="" disabled>Select your degree program</option>
+            <option *ngFor="let p of programs" [value]="p.id">
+              {{ p.name }} <ng-container *ngIf="p.degree">&nbsp;({{ p.degree }})</ng-container>
             </option>
           </select>
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="
-              academic.get('facultyId')?.touched &&
-              academic.get('facultyId')?.invalid
-            "
-          >
-            Please select your faculty.
+
+          <div class="invalid-feedback d-block"
+               *ngIf="academic.get('degreeProgramId')?.touched && academic.get('degreeProgramId')?.invalid">
+            Please select your degree program.
           </div>
 
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="
-              academic.get('facultyId')?.touched &&
-              academic.get('facultyId')?.hasError('facultyMismatch')
-            "
-          >
-            Selected faculty doesn’t belong to the chosen university.
+          <div class="invalid-feedback d-block"
+               *ngIf="academic.get('degreeProgramId')?.touched && academic.get('degreeProgramId')?.hasError('facultyMismatch')">
+            Selected degree program doesn’t belong to the chosen university.
           </div>
         </div>
 
@@ -206,18 +177,12 @@
           </div>
           <div class="col-md-8">
             <label class="form-label">Start year</label>
-            <input
-              type="number"
-              class="form-control"
-              formControlName="startYear"
-            />
+            <input type="number" class="form-control" formControlName="startYear" />
           </div>
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <button class="btn btn-light" type="button" (click)="back()">
-            Back
-          </button>
+          <button class="btn btn-light" type="button" (click)="back()">Back</button>
           <button class="btn btn-primary" type="submit">Continue</button>
         </div>
       </form>
@@ -225,22 +190,15 @@
       <!-- Step 3 -->
       <div *ngIf="step === 3" [formGroup]="profile">
         <div class="form-check mb-3">
-          <input
-            id="tos"
-            type="checkbox"
-            class="form-check-input"
-            formControlName="acceptTos"
-          />
+          <input id="tos" type="checkbox" class="form-check-input" formControlName="acceptTos" />
           <label for="tos" class="form-check-label">
             I agree to the
             <a routerLink="/auth/legal/terms" target="_blank" rel="noopener">Terms of Service</a>
             and
             <a routerLink="/auth/legal/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
           </label>
-          <div
-            class="invalid-feedback d-block"
-            *ngIf="profile.get('acceptTos')?.touched && profile.get('acceptTos')?.invalid"
-          >
+          <div class="invalid-feedback d-block"
+               *ngIf="profile.get('acceptTos')?.touched && profile.get('acceptTos')?.invalid">
             You must accept to continue.
           </div>
         </div>
@@ -248,40 +206,22 @@
         <div class="border rounded p-3 mb-3 bg-body-tertiary">
           <h6 class="mb-2">Summary</h6>
           <ul class="m-0 small">
-            <li>
-              <strong>Username:</strong> {{ account.get("username")?.value }}
-            </li>
-            <li><strong>Email:</strong> {{ account.get("email")?.value }}</li>
-            <li>
-              <strong>University:</strong>
-              {{ getUniversityName(academic.get("universityId")?.value) }}
-            </li>
-            <li>
-              <strong>Faculty:</strong>
-              {{ getFacultyName(academic.get("facultyId")?.value) }}
-            </li>
+            <li><strong>Username:</strong> {{ account.get('username')?.value }}</li>
+            <li><strong>Email:</strong> {{ account.get('email')?.value }}</li>
+            <li><strong>University:</strong> {{ getUniversityName(academic.get('universityId')?.value) }}</li>
+            <li><strong>Degree program:</strong> {{ getProgramName(academic.get('degreeProgramId')?.value) }}</li>
             <li>
               <strong>Start semester:</strong>
-              {{ academic.get("semesterType")?.value }}
-              {{ academic.get("startYear")?.value }}
+              {{ academic.get('semesterType')?.value }} {{ academic.get('startYear')?.value }}
             </li>
           </ul>
         </div>
 
         <div class="d-flex justify-content-between">
-          <button class="btn btn-light" type="button" (click)="back()">
-            Back
-          </button>
-          <button
-            class="btn btn-primary"
-            [disabled]="loading || profile.invalid"
-            (click)="submit()"
-          >
+          <button class="btn btn-light" type="button" (click)="back()">Back</button>
+          <button class="btn btn-primary" [disabled]="loading || profile.invalid" (click)="submit()">
             <span *ngIf="!loading">Create account</span>
-            <span
-              *ngIf="loading"
-              class="spinner-border spinner-border-sm"
-            ></span>
+            <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
           </button>
         </div>
       </div>

@@ -1,9 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -20,26 +15,26 @@ enum Role {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  username      String?  @unique   // keep this
-  passwordHash  String
-  avatarUrl     String?
-  role          Role     @default(USER)
-  isActive      Boolean  @default(true)
-  emailVerified Boolean  @default(false)
+  id               String   @id @default(cuid())
+  email            String   @unique
+  username         String?  @unique
+  passwordHash     String
+  avatarUrl        String?
+  role             Role     @default(USER)
+  isActive         Boolean  @default(true)
+  emailVerified    Boolean  @default(false)
 
-  universityId  String?
-  facultyId     String?
-  university    University? @relation(fields: [universityId], references: [id])
-  faculty       Faculty?    @relation(fields: [facultyId], references: [id])
+  universityId     String?
+  degreeProgramId  String?                 // ← was facultyId
+  university       University? @relation(fields: [universityId], references: [id])
+  degreeProgram    DegreeProgram? @relation(fields: [degreeProgramId], references: [id])
 
-  startSemester String?
+  startSemester    String?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  sessions      Session[]
+  sessions         Session[]
 }
 
 model Session {
@@ -57,23 +52,30 @@ model Session {
 }
 
 model University {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  country   String?
-  city      String?
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  name            String   @unique
+  country         String?
+  city            String?
+  createdAt       DateTime @default(now())
 
-  faculties Faculty[]
-  users     User[]
+  degreePrograms  DegreeProgram[]         // ← was faculties
+  users           User[]
 }
 
-model Faculty {
-  id            String   @id @default(cuid())
-  universityId  String
-  university    University @relation(fields: [universityId], references: [id], onDelete: Cascade)
-  name          String
+model DegreeProgram {
+  id              String     @id @default(uuid())           // ✅ auto-UUID
+  universityId    String
+  university      University @relation(fields: [universityId], references: [id], onDelete: Cascade)
 
-  users         User[]
+  name            String
+  degree          String
+  language        String?
+  startSemesters  String?
+  nc              String?
 
-  @@unique([universityId, name])
+  // ✅ back-relation to User (this was missing)
+  users           User[]
+
+  // Useful uniqueness across a uni
+  @@unique([universityId, name, degree])
 }

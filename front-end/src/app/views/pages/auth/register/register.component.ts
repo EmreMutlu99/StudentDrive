@@ -12,37 +12,25 @@ import {
 import { HttpClient } from '@angular/common/http';
 
 type University = { id: string; name: string };
-type Faculty = { id: string; name: string };
+type DegreeProgram = { id: string; name: string; degree?: string | null };
 
-// Local seed data (used as fallback if API fails)
+// Local seed data (fallback if API fails)
 const SEED_UNIS: University[] = [
   { id: 'rwth', name: 'RWTH Aachen University' },
   { id: 'tum',  name: 'Technical University of Munich (TUM)' },
-  { id: 'boğ',  name: 'Boğaziçi University' },
+  { id: 'bog',  name: 'Boğaziçi University' },
   { id: 'upb',  name: 'University of Paderborn' }
 ];
 
-type SeedFaculty = { id: string; name: string; universityId: string };
-const SEED_FACULTIES: SeedFaculty[] = [
-  // RWTH
-  { id: 'rwth-eecs', name: 'Electrical Engineering & Info Tech', universityId: 'rwth' },
-  { id: 'rwth-me',   name: 'Mechanical Engineering',            universityId: 'rwth' },
-  { id: 'rwth-cs',   name: 'Computer Science',                  universityId: 'rwth' },
+type SeedProgram = { id: string; name: string; universityId: string };
+const SEED_PROGRAMS: SeedProgram[] = [
+  // RWTH (examples)
+  { id: 'rwth-inf-bsc', name: 'Informatik B.Sc.', universityId: 'rwth' },
+  { id: 'rwth-me-msc',  name: 'Maschinenbau M.Sc.', universityId: 'rwth' },
 
-  // TUM
-  { id: 'tum-in',    name: 'Informatics',                       universityId: 'tum' },
-  { id: 'tum-ei',    name: 'Electrical & Computer Engineering', universityId: 'tum' },
-  { id: 'tum-ma',    name: 'Mathematics',                       universityId: 'tum' },
-
-  // Boğaziçi
-  { id: 'bog-cmp',   name: 'Computer Engineering',              universityId: 'boğ' },
-  { id: 'bog-ee',    name: 'Electrical & Electronics',          universityId: 'boğ' },
-  { id: 'bog-ie',    name: 'Industrial Engineering',            universityId: 'boğ' },
-
-  // UPB
-  { id: 'upb-cs',    name: 'Computer Science',                  universityId: 'upb' },
-  { id: 'upb-me',    name: 'Mechanical Engineering',            universityId: 'upb' },
-  { id: 'upb-ee',    name: 'Electrical Engineering',            universityId: 'upb' },
+  // TUM (examples)
+  { id: 'tum-in-bsc',   name: 'Informatics B.Sc.', universityId: 'tum' },
+  { id: 'tum-ei-msc',   name: 'Electrical & Computer Engineering M.Sc.', universityId: 'tum' },
 ];
 
 function passwordMatch(group: AbstractControl): ValidationErrors | null {
@@ -63,23 +51,22 @@ export class RegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
 
-  // If you proxy /api to 3000, set API_BASE = '' and keep URLs starting with /api
   API_BASE = 'http://localhost:3000';
 
-  step = 1;                // 1 = Account, 2 = Academic, 3 = Review
-  readonly totalSteps = 3; // used for progress percentage
+  step = 1;
+  readonly totalSteps = 3;
 
   loading = false;
   serverError = '';
 
   universities: University[] = [];
-  faculties: Faculty[] = [];          // filtered list for current university
-  private allSeedFaculties = SEED_FACULTIES;
+  programs: DegreeProgram[] = [];              // ← degree programs for selected university
+  private seedPrograms = SEED_PROGRAMS;
 
   currentYear = new Date().getFullYear();
 
-  // Whitelist of valid faculties for current university (used by validator)
-  allowedFacultyIds = new Set<string>();
+  // Whitelist of valid program IDs for validator
+  allowedProgramIds = new Set<string>();
 
   // --- Form ---
   form = this.fb.group({
@@ -99,8 +86,8 @@ export class RegisterComponent implements OnInit {
 
     academic: this.fb.group({
       universityId: ['', Validators.required],
-      facultyId: ['', [Validators.required, (control: AbstractControl) => this.facultyMatchesUniversity(control)]],
-      semesterType: ['WS', Validators.required],  // 'WS' or 'SS'
+      degreeProgramId: ['', [Validators.required, (c: AbstractControl) => this.programMatchesUniversity(c)]],
+      semesterType: ['WS', Validators.required],  // 'WS' | 'SS'
       startYear: [this.currentYear, [Validators.required, Validators.min(2000), Validators.max(this.currentYear + 2)]],
     }),
 
@@ -120,72 +107,62 @@ export class RegisterComponent implements OnInit {
   get password() { return this.pwdGroup.get('password')!; }
   get confirm()  { return this.pwdGroup.get('confirmPassword')!; }
 
-  /** Progress % for the top progress bar (step 1 -> 0%, step 2 -> 50%, step 3 -> 100%) */
+  /** Top progress bar % */
   get progressPct(): number {
     const pct = ((this.step - 1) / (this.totalSteps - 1)) * 100;
     return Math.max(0, Math.min(100, pct));
   }
 
-  /** (Optional) helpers if you want to “paint” the stepper connectors too */
-  get connector12Active(): boolean { return this.step >= 2; }
-  get connector23Active(): boolean { return this.step >= 3; }
-
-  // --- Custom validator for coordinated faculty/university ---
-  facultyMatchesUniversity(control: AbstractControl): ValidationErrors | null {
+  // --- Custom validator: selected program belongs to selected university ---
+  programMatchesUniversity(control: AbstractControl): ValidationErrors | null {
     const v = control.value as string;
     if (!v) return null; // let `required` handle empty
-    return this.allowedFacultyIds.has(String(v)) ? null : { facultyMismatch: true };
+    return this.allowedProgramIds.has(String(v)) ? null : { facultyMismatch: true }; // keep same key to reuse template messages
   }
 
   ngOnInit(): void {
     this.loadUniversities();
 
-    // when university changes, clear & load faculties
+    // When university changes, clear & load programs
     this.academic.get('universityId')!.valueChanges.subscribe((val) => {
-      this.academic.get('facultyId')!.reset('');
-      this.allowedFacultyIds.clear();
-      if (val) this.loadFaculties(String(val));
-      else this.faculties = [];
+      this.academic.get('degreeProgramId')!.reset('');
+      this.allowedProgramIds.clear();
+      if (val) this.loadPrograms(String(val));
+      else this.programs = [];
     });
   }
 
   // ---------- Data Loading (API with seed fallback) ----------
   private async loadUniversities() {
     try {
-      const data = await this.http.get<University[]>(`${this.API_BASE}/api/meta/universities`).toPromise();
+      const data = await this.http.get<University[]>(`${this.API_BASE}/api/universities`).toPromise();
       this.universities = (data && data.length) ? data : SEED_UNIS;
     } catch {
       this.universities = SEED_UNIS;
     }
   }
 
-  private async loadFaculties(universityId: string) {
+  private async loadPrograms(universityId: string) {
     try {
-      const data = await this.http.get<Faculty[]>(
-        `${this.API_BASE}/api/meta/faculties`,
+      const data = await this.http.get<DegreeProgram[]>(
+        `${this.API_BASE}/api/degree-programs`,
         { params: { universityId } }
       ).toPromise();
 
-      if (data && data.length) {
-        // API returned filtered list already
-        this.faculties = data;
-      } else {
-        // fallback to local seed filtering
-        this.faculties = this.fromSeed(universityId);
-      }
+      this.programs = (data && data.length) ? data : this.fromSeed(universityId);
     } catch {
-      this.faculties = this.fromSeed(universityId);
+      this.programs = this.fromSeed(universityId);
     }
 
     // rebuild whitelist for validator and trigger revalidation
-    this.allowedFacultyIds = new Set(this.faculties.map(f => String(f.id)));
-    this.academic.get('facultyId')!.updateValueAndValidity();
+    this.allowedProgramIds = new Set(this.programs.map(p => String(p.id)));
+    this.academic.get('degreeProgramId')!.updateValueAndValidity();
   }
 
-  private fromSeed(universityId: string): Faculty[] {
-    return this.allSeedFaculties
-      .filter(f => f.universityId === universityId)
-      .map<Faculty>(f => ({ id: f.id, name: f.name }));
+  private fromSeed(universityId: string): DegreeProgram[] {
+    return this.seedPrograms
+      .filter(p => p.universityId === universityId)
+      .map<DegreeProgram>(p => ({ id: p.id, name: p.name }));
   }
 
   // ---------- Helpers ----------
@@ -195,10 +172,10 @@ export class RegisterComponent implements OnInit {
     return u?.name ?? '—';
   }
 
-  getFacultyName(id: string | null | undefined): string {
+  getProgramName(id: string | null | undefined): string {
     if (!id) return '—';
-    const f = this.faculties.find(x => x.id === id);
-    return f?.name ?? '—';
+    const p = this.programs.find(x => x.id === id);
+    return p ? (p.degree ? `${p.name} (${p.degree})` : p.name) : '—';
   }
 
   private composeStartSemester(type: 'WS' | 'SS', year: number): string {
@@ -227,10 +204,9 @@ export class RegisterComponent implements OnInit {
     this.serverError = '';
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
-    // Defensive guard: ensure selected faculty is valid for current university
     const aca = this.academic.value as any;
-    if (!this.allowedFacultyIds.has(String(aca.facultyId))) {
-      this.academic.get('facultyId')!.setErrors({ facultyMismatch: true });
+    if (!this.allowedProgramIds.has(String(aca.degreeProgramId))) {
+      this.academic.get('degreeProgramId')!.setErrors({ facultyMismatch: true });
       this.academic.markAllAsTouched();
       return;
     }
@@ -246,7 +222,7 @@ export class RegisterComponent implements OnInit {
       username: String(acc.username || '').trim(),
       startSemester,
       universityId: aca.universityId,
-      facultyId: aca.facultyId
+      degreeProgramId: aca.degreeProgramId
     };
 
     try {
