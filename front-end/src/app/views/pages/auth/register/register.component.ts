@@ -12,6 +12,10 @@ import {
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
+import { AsyncValidatorFn } from '@angular/forms';
+import { of, timer } from 'rxjs';
+import { catchError, switchMap, map } from 'rxjs/operators';
+
 type University = { id: string; name: string };
 type DegreeProgram = { id: string; name: string; degree?: string | null };
 
@@ -77,16 +81,27 @@ export class RegisterComponent implements OnInit {
   // --- Form ---
   form = this.fb.group({
     account: this.fb.group({
-      username: [
+      username: this.fb.control(
         '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(20),
-          Validators.pattern(/^[a-zA-Z0-9._-]+$/),
-        ],
-      ],
-      email: ['', [Validators.required, Validators.email]],
+        {
+          validators: [
+            Validators.required,
+            Validators.minLength(3),
+            Validators.maxLength(20),
+            Validators.pattern(/^[a-zA-Z0-9._-]+$/),
+          ],
+          asyncValidators: [this.usernameAvailabilityValidator()],
+          updateOn: 'change', // use 'blur' if you prefer only after field loses focus
+        }
+      ),
+      email: this.fb.control(
+        '',
+        {
+          validators: [Validators.required, Validators.email],
+          asyncValidators: [this.emailAvailabilityValidator()],
+          updateOn: 'change'
+        }
+      ),
       passwordGroup: this.fb.group(
         {
           password: ['', [Validators.required, Validators.minLength(6)]],
@@ -307,5 +322,46 @@ export class RegisterComponent implements OnInit {
       return;
     }
   }
+
+
+  // ---------- username availibility check ----------
+  usernameAvailabilityValidator(): AsyncValidatorFn {
+    return (control) => {
+      const value = String(control.value || '').trim();
+      if (!value) return of(null); // required sync validator handles empties
+  
+      // debounce 400ms to avoid a request per keypress
+      return timer(400).pipe(
+        switchMap(() =>
+          this.http.get<{ available: boolean }>(
+            `${this.API_BASE}/api/users/username-available`,
+            { params: { username: value } }
+          )
+        ),
+        map(res => (res.available ? null : { usernameTaken: true })),
+        catchError(() => of(null)) // fail-open to not block typing if API hiccups
+      );
+    };
+  }
+
+  // ---------- email availibility check ----------
+  emailAvailabilityValidator(): AsyncValidatorFn {
+    return (control) => {
+      const value = String(control.value || '').trim();
+      if (!value) return of(null);
+  
+      return timer(400).pipe(
+        switchMap(() =>
+          this.http.get<{ available: boolean }>(
+            `${this.API_BASE}/api/users/email-available`,
+            { params: { email: value } }
+          )
+        ),
+        map(res => (res.available ? null : { emailTaken: true })),
+        catchError(() => of(null))
+      );
+    };
+  }
+  
 }
 

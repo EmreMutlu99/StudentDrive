@@ -9,6 +9,8 @@ const authRoute = require('./src/api/auth/auth');
 const universitiesRoute = require('./src/api/universities/universities');
 const degreeProgramsRoute = require('./src/api/degreePrograms/degreePrograms');
 const emailRouter = require("./src/api/email_sender/email_router");
+const usersRouter = require('./src/api/users/users');
+
 // Load env
 dotenv.config();
 
@@ -48,6 +50,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/universities', universitiesRoute);
 app.use('/api/degree-programs', degreeProgramsRoute);
 app.use("/api/email", emailRouter);
+app.use('/api/users', usersRouter);
 
 // Start server
 app.listen(PORT, () => {

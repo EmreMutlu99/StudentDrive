@@ -87,6 +87,12 @@
           />
           <div
             class="invalid-feedback d-block"
+            *ngIf="username.touched && username.hasError('usernameTaken')"
+          >
+            This username is already taken.
+          </div>
+          <div
+            class="invalid-feedback d-block"
             *ngIf="username.touched && username.invalid"
           >
             3–20 chars. Letters, numbers, ., _, -
@@ -108,6 +114,12 @@
             *ngIf="email.touched && email.invalid"
           >
             Please enter a valid email.
+          </div>
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="email.touched && email.hasError('emailTaken')"
+          >
+            This email is already registered.
           </div>
         </div>
 
@@ -245,36 +257,62 @@
       <div *ngIf="step === 3" [formGroup]="profile">
         <!-- Terms -->
         <div class="form-check mb-4">
-          <input id="tos" type="checkbox" class="form-check-input" formControlName="acceptTos" />
+          <input
+            id="tos"
+            type="checkbox"
+            class="form-check-input"
+            formControlName="acceptTos"
+          />
           <label for="tos" class="form-check-label">
             I agree to the
-            <a routerLink="/auth/legal/terms" target="_blank" rel="noopener">Terms of Service</a>
+            <a routerLink="/auth/legal/terms" target="_blank" rel="noopener"
+              >Terms of Service</a
+            >
             and
-            <a routerLink="/auth/legal/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+            <a routerLink="/auth/legal/privacy" target="_blank" rel="noopener"
+              >Privacy Policy</a
+            >.
           </label>
-          <div class="invalid-feedback d-block" *ngIf="profile.get('acceptTos')?.touched && profile.get('acceptTos')?.invalid">
+          <div
+            class="invalid-feedback d-block"
+            *ngIf="
+              profile.get('acceptTos')?.touched &&
+              profile.get('acceptTos')?.invalid
+            "
+          >
             You must accept to continue.
           </div>
         </div>
-      
+
         <!-- Email verification -->
         <section class="verify-box mb-4">
-          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+          <div
+            class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
+          >
             <h6 class="m-0">Email verification</h6>
-            <small class="text-muted">To: <strong>{{ account.get('email')?.value }}</strong></small>
+            <small class="text-muted"
+              >To: <strong>{{ account.get("email")?.value }}</strong></small
+            >
           </div>
-      
+
           <!-- Before sending -->
           <div *ngIf="!codeSent">
             <p class="text-muted small mb-3">
               We’ll send a 6-digit code to confirm your email address.
             </p>
-            <button class="btn btn-outline-primary" (click)="sendCode()" [disabled]="loading || form.invalid">
+            <button
+              class="btn btn-outline-primary"
+              (click)="sendCode()"
+              [disabled]="loading || form.invalid"
+            >
               <span *ngIf="!loading">Send verification code</span>
-              <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+              <span
+                *ngIf="loading"
+                class="spinner-border spinner-border-sm"
+              ></span>
             </button>
           </div>
-      
+
           <!-- After sending -->
           <div *ngIf="codeSent">
             <label class="form-label" for="code">Enter the 6-digit code</label>
@@ -290,40 +328,65 @@
               placeholder="••••••"
               autocomplete="one-time-code"
             />
-      
+
             <div class="actions">
-              <button class="btn btn-secondary" (click)="resendCode()" [disabled]="loading">Resend</button>
-              <button class="btn btn-success" (click)="confirmCode()" [disabled]="loading || !verificationCode">
+              <button
+                class="btn btn-secondary"
+                (click)="resendCode()"
+                [disabled]="loading"
+              >
+                Resend
+              </button>
+              <button
+                class="btn btn-success"
+                (click)="confirmCode()"
+                [disabled]="loading || !verificationCode"
+              >
                 <span *ngIf="!loading">Verify & Create account</span>
-                <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+                <span
+                  *ngIf="loading"
+                  class="spinner-border spinner-border-sm"
+                ></span>
               </button>
             </div>
-      
-            <p class="small text-muted mt-2 mb-0">Code expires in {{ codeTtlMin }} minutes.</p>
+
+            <p class="small text-muted mt-2 mb-0">
+              Code expires in {{ codeTtlMin }} minutes.
+            </p>
           </div>
         </section>
-      
+
         <!-- Summary -->
         <section class="summary-box mb-4">
           <h6 class="mb-2">Summary</h6>
           <ul class="m-0 small">
-            <li><strong>Username:</strong> {{ account.get('username')?.value }}</li>
-            <li><strong>Email:</strong> {{ account.get('email')?.value }}</li>
-            <li><strong>University:</strong> {{ getUniversityName(academic.get('universityId')?.value) }}</li>
-            <li><strong>Degree program:</strong> {{ getProgramName(academic.get('degreeProgramId')?.value) }}</li>
+            <li>
+              <strong>Username:</strong> {{ account.get("username")?.value }}
+            </li>
+            <li><strong>Email:</strong> {{ account.get("email")?.value }}</li>
+            <li>
+              <strong>University:</strong>
+              {{ getUniversityName(academic.get("universityId")?.value) }}
+            </li>
+            <li>
+              <strong>Degree program:</strong>
+              {{ getProgramName(academic.get("degreeProgramId")?.value) }}
+            </li>
             <li>
               <strong>Start semester:</strong>
-              {{ academic.get('semesterType')?.value }} {{ academic.get('startYear')?.value }}
+              {{ academic.get("semesterType")?.value }}
+              {{ academic.get("startYear")?.value }}
             </li>
           </ul>
         </section>
-      
+
         <!-- Nav -->
         <div class="d-flex justify-content-between flex-wrap gap-2">
-          <button class="btn btn-light" type="button" (click)="back()">Back</button>
+          <button class="btn btn-light" type="button" (click)="back()">
+            Back
+          </button>
         </div>
       </div>
-      
     </div>
   </div>
 
