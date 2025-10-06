@@ -4,41 +4,77 @@
       <div class="card">
         <div class="row">
           <div class="col-md-4 pe-md-0">
-            <div class="auth-side-wrapper" 
-                 [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }">
+            <div
+              class="auth-side-wrapper"
+              [ngStyle]="{ 'background-image': 'url(https://placehold.co/250x650)' }">
             </div>
           </div>
+
           <div class="col-md-8 ps-md-0">
             <div class="auth-form-wrapper px-4 py-5">
-              <a routerLink="." class="nobleui-logo d-block mb-2">Noble<span>UI</span></a>
+              <a routerLink="/" class="nobleui-logo d-block mb-2">Student<span>Drive</span></a>
               <h5 class="text-secondary fw-normal mb-4">Welcome back! Log in to your account.</h5>
-              <form class="forms-sample">
+
+              <form class="forms-sample" (submit)="onSubmit($event)" novalidate>
+                <div *ngIf="serverError" class="alert alert-danger">{{ serverError }}</div>
+
                 <div class="mb-3">
-                  <label for="exampleInputEmail1" class="form-label">Email address</label>
-                  <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email" value="admin@demo.com">
+                  <label for="email" class="form-label">Email address</label>
+                  <input
+                    id="email"
+                    type="email"
+                    class="form-control"
+                    [(ngModel)]="email"
+                    name="email"
+                    placeholder="you@uni.edu"
+                    autocomplete="username"
+                    required />
                 </div>
+
                 <div class="mb-3">
-                  <label for="exampleInputPassword1" class="form-label">Password</label>
-                  <input type="password" class="form-control" id="exampleInputPassword1" autocomplete="current-password" placeholder="Password" value="12345678">
+                  <label for="password" class="form-label">Password</label>
+                  <input
+                    id="password"
+                    type="password"
+                    class="form-control"
+                    [(ngModel)]="password"
+                    name="password"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    required />
                 </div>
+
                 <div class="form-check mb-3">
-                  <input type="checkbox" class="form-check-input" id="authCheck">
-                  <label class="form-check-label" for="authCheck">
-                    Remember me
-                  </label>
+                  <input
+                    id="authCheck"
+                    type="checkbox"
+                    class="form-check-input"
+                    [(ngModel)]="rememberMe"
+                    name="rememberMe" />
+                  <label class="form-check-label" for="authCheck">Remember me</label>
                 </div>
-                <div>
-                  <button type="submit" class="btn btn-primary me-2 mb-2 mb-md-0" (click)="onLoggedin($event)">Login</button>
-                  <button type="button" class="btn btn-outline-primary btn-icon-text mb-2 mb-md-0">
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="loading || !email || !password">
+                    <span *ngIf="!loading">Login</span>
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  </button>
+
+                  <!-- Example social button (kept from your UI) -->
+                  <button type="button" class="btn btn-outline-primary btn-icon-text" disabled>
                     <i class="feather icon-twitter btn-icon-prepend"></i>
                     Login with Twitter
                   </button>
 
-                  <!-- ✅ Google sign-in button -->
-                  <div class="mt-2">
+                  <!-- Google sign-in -->
+                  <div class="mt-2 mt-md-0">
                     <app-google-button></app-google-button>
                   </div>
                 </div>
+
                 <a routerLink="/auth/register" class="d-block mt-3 text-secondary">Not a user? Sign up</a>
               </form>
             </div>

@@ -47,7 +47,8 @@ model Session {
   revokedAt   DateTime?
   lastSeenAt  DateTime?
   userAgent   String?
-
+  userAgentIp String? 
+  
   @@index([userId])
   @@index([expiresAt])
 }

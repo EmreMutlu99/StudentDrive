@@ -1,16 +1,34 @@
+// app.routes.ts
 import { Routes } from '@angular/router';
 import { BaseComponent } from './views/layout/base/base.component';
 import { authGuard } from './core/guards/auth.guard';
+import { HomeRedirectComponent } from './home-redirect.component/home-redirect.component.component'; // decides /dashboard vs /landing
+import { loggedInRedirectGuard } from './core/guards/logged-in-redirect.guard'; // sends logged-in users away from /auth
 
 export const routes: Routes = [
+  // Root: decide based on current session
+  { path: '', component: HomeRedirectComponent },
 
-  { path: 'auth', loadChildren: () => import('./views/pages/auth/auth.routes') },
+  // Public marketing page
+  {
+    path: 'landing',
+    loadComponent: () =>
+      import('./views/pages/auth/landing/landing.component').then(c => c.LandingComponent),
+  },
+
+  // Public auth area (login/register/legal). If already logged in, redirect to /dashboard.
+  {
+    path: 'auth',
+    canMatch: [loggedInRedirectGuard],
+    loadChildren: () => import('./views/pages/auth/auth.routes'),
+  },
+
+  // Private app shell — everything here is protected
   {
     path: '',
     component: BaseComponent,
     canActivateChild: [authGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
         loadChildren: () => import('./views/pages/dashboard/dashboard.routes')
@@ -49,6 +67,8 @@ export const routes: Routes = [
       }
     ]
   },
+
+  // Errors
   {
     path: 'error',
     loadComponent: () => import('./views/pages/error/error.component').then(c => c.ErrorComponent),
@@ -57,5 +77,7 @@ export const routes: Routes = [
     path: 'error/:type',
     loadComponent: () => import('./views/pages/error/error.component').then(c => c.ErrorComponent)
   },
+
+  // 404
   { path: '**', redirectTo: 'error/404', pathMatch: 'full' }
 ];
