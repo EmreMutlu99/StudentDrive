@@ -2,24 +2,38 @@
   <div>
     <h4 class="mb-3 mb-md-0">Welcome to Dashboard</h4>
   </div>
-  <div class="d-flex align-items-center flex-wrap text-nowrap">
-    <div class="input-group w-200px me-2 mb-2 mb-md-0">
-      <button class="btn btn-outline-primary btn-icon calendar" type="button" (click)="d.toggle()">
-        <i data-feather="calendar" appFeatherIcon></i>
-      </button>
-      <input class="form-control border-primary bg-transparent" placeholder="yyyy-mm-dd"
-          name="dp" [(ngModel)]="currentDate" ngbDatepicker #d="ngbDatepicker">
-    </div>
-    <button type="button" class="btn btn-outline-primary btn-icon-text me-2 mb-2 mb-md-0">
-      <i class="btn-icon-prepend" data-feather="printer" appFeatherIcon></i>
-      Print
-    </button>
-    <button type="button" class="btn btn-primary btn-icon-text mb-2 mb-md-0">
-      <i class="btn-icon-prepend" data-feather="download-cloud" appFeatherIcon></i>
-      Download Report
-    </button>
+</div>
+
+<!-- DASHBOARD XXL SEARCH -->
+<div class="row">
+  <div class="col-12">
+    <form class="dashboard-search-xxl mx-auto my-3 my-md-4" (submit)="$event.preventDefault()">
+      <div class="input-group shadow-sm search-xxl-group">
+        <span class="input-group-text bg-body border-0 search-xxl-icon">
+          <i data-feather="search" appFeatherIcon class="icon-lg"></i>
+        </span>
+        <input
+          type="search"
+          class="form-control bg-body border-0 search-xxl-input"
+          placeholder="Search everything… projects, reservations, customers, docs"
+          aria-label="Dashboard search"
+        />
+        <button class="btn btn-primary search-xxl-btn" type="submit">
+          Search
+        </button>
+      </div>
+
+      <!-- optional quick chips -->
+      <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+        <a class="chip-xxl" href="" (click)="false">Projects</a>
+        <a class="chip-xxl" href="" (click)="false">Invoices</a>
+        <a class="chip-xxl" href="" (click)="false">Reservations</a>
+        <a class="chip-xxl" href="" (click)="false">Customers</a>
+      </div>
+    </form>
   </div>
 </div>
+
 
 <div class="row">
   <div class="col-12 col-xl-12 stretch-card">
