@@ -36,6 +36,7 @@ model User {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   sessions         Session[]
+  files            File[]         @relation("UserFiles")
 }
 
 model Session {
@@ -87,4 +88,34 @@ model EmailVerification {
   expiresAt   DateTime
   attempts    Int      @default(0)
   lastSentAt  DateTime @default(now())
+}
+
+enum StorageBackend {
+  minio
+  s3
+  gcs
+  filesystem
+}
+
+model File {
+  id               Int            @id @default(autoincrement())
+  userId           String         @map("user_id")
+  filename         String
+  originalFilename String         @map("original_filename")
+  mimetype         String
+  sizeBytes        Int            @map("size_bytes")
+  storagePath      String         @map("storage_path")
+  storageBackend   StorageBackend @default(minio) @map("storage_backend")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  verifiedAt       DateTime?      @map("verified_at")
+
+  // name the relation to match the User side
+  user             User           @relation("UserFiles", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_files_user_id")
+  @@index([createdAt(sort: Desc)], map: "idx_files_created_at")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_files_user_created")
+  @@index([verifiedAt], map: "idx_files_verified_at")
+
+  @@map("files")
 }

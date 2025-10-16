@@ -10,6 +10,9 @@ const universitiesRoute = require('./src/api/universities/universities');
 const degreeProgramsRoute = require('./src/api/degreePrograms/degreePrograms');
 const emailRouter = require("./src/api/email_sender/email_router");
 const usersRouter = require('./src/api/users/users');
+const fileRoutes = require("./src/api/file_storage/file_storage");
+const MinioStorage = require("./src/service/minIO_Storage/minIO_Storage");
+
 
 // Load env
 dotenv.config();
@@ -51,8 +54,25 @@ app.use('/api/universities', universitiesRoute);
 app.use('/api/degree-programs', degreeProgramsRoute);
 app.use("/api/email", emailRouter);
 app.use('/api/users', usersRouter);
+app.use("/api/files", fileRoutes);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+
+// Initialize MinIO and start server
+async function startServer() {
+  try {
+    // Ensure MinIO bucket exists
+    const storage = new MinioStorage();
+    await storage.ensureBucket();
+    console.log("MinIO storage ready");
+
+    // Start server
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();

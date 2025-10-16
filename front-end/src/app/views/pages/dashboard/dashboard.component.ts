@@ -13,8 +13,8 @@ import {
   ThemeCssVariablesType,
 } from '../../../core/services/theme-css-variable.service';
 import { AuthService, CurrentUser } from '../../../core/services/auth.service';
-import { Observable } from 'rxjs';
-
+import { filter, Observable, take } from 'rxjs';
+import {FileUploadComponent} from "./file-upload/file-upload.component"
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -24,14 +24,13 @@ import { Observable } from 'rxjs';
     NgbDatepickerModule,
     NgApexchartsModule,
     FeatherIconDirective,
+    FileUploadComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   user$!: Observable<CurrentUser | null | false>;
-
-
 
   themeCssVariables = inject(ThemeCssVariableService).getThemeCssVariables();
 
@@ -42,7 +41,7 @@ export class DashboardComponent implements OnInit {
     this.auth.ensureSession().subscribe();
     this.user$ = this.auth.user$;
     console.log('this.user$: ', this.user$);
-
+    
   }
 
 
